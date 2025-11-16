@@ -1,0 +1,20 @@
+<mat-card class="upload-panel surface">
+  <mat-card-header>
+    <mat-card-title>Analizador de Imágenes</mat-card-title>
+    <mat-card-subtitle class="text-muted">
+      Sube una imagen y te devolveremos etiquetas descriptivas usando IA.
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <ui-file-input (fileSelected)="onFileSelected($event)"></ui-file-input>
+  </mat-card-content>
+
+  <mat-card-actions>
+    <ui-primary-button
+      label="Analizar imagen"
+      [disabled]="isAnalyzeDisabled"
+      (click)="onAnalyzeClick()"
+    ></ui-primary-button>
+  </mat-card-actions>
+</mat-card>
