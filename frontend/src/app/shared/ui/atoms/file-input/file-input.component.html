@@ -1,0 +1,17 @@
+<div class="file-input">
+  <button mat-stroked-button type="button" (click)="fileInput.click()">
+    Seleccionar imagen
+  </button>
+
+  <span class="file-name">
+    {{ fileName }}
+  </span>
+
+  <input
+    #fileInput
+    type="file"
+    accept="image/*"
+    (change)="onFileChange($event)"
+    class="file-input__native"
+  />
+</div>
