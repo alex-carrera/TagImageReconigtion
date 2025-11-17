@@ -1,12 +1,8 @@
-import { config } from 'dotenv';
-config(); // carga variables de entorno desde .env si existe
-
+import { env } from './config/env/index.js';
 import { createApp } from './infrastructure/rest/express/app.js';
-
-const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 
 const app = createApp();
 
-app.listen(port, () => {
-    console.log(`Image Analyzer backend listening on port ${port}`);
+app.listen(env.port, () => {
+    console.log(`🚀 Backend running on port ${env.port}`);
 });
