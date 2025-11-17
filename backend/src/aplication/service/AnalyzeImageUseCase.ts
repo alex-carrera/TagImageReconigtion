@@ -1,7 +1,7 @@
-import type {AnalyzeImageUseCaseIn, AnalyzeOptions} from "../../domain/port/in/AnalyzeImageUseCaseIn.js";
-import type {TaggingProviderOut} from "../../domain/port/out/TaggingProvidersOut.js";
-import type {AnalyzeResult} from "../../domain/model/AnalyzeResult.js";
-import type {ProviderId} from "../../domain/model/ProviderId.js";
+import type { AnalyzeImageUseCaseIn, AnalyzeOptions } from '../../domain/port/in/AnalyzeImageUseCaseIn.js';
+import type { TaggingProviderOut } from '../../domain/port/out/TaggingProvidersOut.js';
+import type { AnalyzeResult } from '../../domain/model/AnalyzeResult.js';
+import type { ProviderId } from '../../domain/model/ProviderId.js';
 
 export class AnalyzeImageUseCase implements AnalyzeImageUseCaseIn {
     constructor(private readonly providers: TaggingProviderOut[]) {
@@ -16,21 +16,31 @@ export class AnalyzeImageUseCase implements AnalyzeImageUseCaseIn {
         }
 
         const orderedProviders = this.resolveProvidersOrder(options?.providerPreference);
-
         let lastError: unknown = null;
 
         for (const provider of orderedProviders) {
             try {
-                const result = await provider.analyze(image, options);
-                return this.applyPostFilters(result, options);
+                const rawResult = await provider.analyze(image, options);
+                const result = this.applyPostFilters(rawResult, options);
+
+                if (!result.tags || result.tags.length === 0) {
+                    console.warn(
+                        `[AnalyzeImageUseCase] Provider ${provider.id} returned empty tags after filters, trying next provider...`
+                    );
+                    lastError =
+                        lastError ??
+                        new Error(`Provider ${provider.id} returned empty tags after filtering.`);
+                    continue;
+                }
+
+                return result;
             } catch (err) {
                 console.error(`[AnalyzeImageUseCase] Provider ${provider.id} failed`, err);
                 lastError = err;
             }
         }
 
-        // Si todos fallan
-        throw lastError ?? new Error('All tagging providers failed');
+        throw lastError ?? new Error('All tagging providers failed or returned empty tags');
     }
 
     private resolveProvidersOrder(
@@ -51,7 +61,7 @@ export class AnalyzeImageUseCase implements AnalyzeImageUseCaseIn {
     }
 
     private applyPostFilters(result: AnalyzeResult, options?: AnalyzeOptions): AnalyzeResult {
-        let tags = result.tags;
+        let tags = result.tags ?? [];
 
         if (options?.minConfidence !== undefined) {
             tags = tags.filter((t) => t.confidence >= options.minConfidence!);
