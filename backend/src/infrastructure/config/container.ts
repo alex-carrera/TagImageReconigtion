@@ -1,19 +1,16 @@
 import type { AnalyzeImageUseCaseIn } from '../../domain/port/in/AnalyzeImageUseCaseIn.js';
+import { ImaggaTaggingAdapter } from '../adapter/ia/ImaggaTaggingAdapter.js';
 import { FakeTaggingProviderAdapter } from '../adapter/ia/FakeTaggingProviderAdapter.js';
 import {AnalyzeImageUseCase} from "../../aplication/service/AnalyzeImageUseCase.js";
 
-/**
- * Por ahora usamos proveedores FAKE para probar el flujo.
- * Más adelante aquí mismo registraremos los adapters reales:
- *  - GoogleVisionTaggingAdapter
- *  - ImaggaTaggingAdapter
- */
 export function createAnalyzeImageUseCase(): AnalyzeImageUseCaseIn {
-    const googleFake = new FakeTaggingProviderAdapter('google_vision', false);
-    const imaggaFake = new FakeTaggingProviderAdapter('imagga', false);
+    const imagga = new ImaggaTaggingAdapter();
 
-    // Orden de prioridad por defecto: Google Vision → Imagga
-    const providers = [googleFake, imaggaFake];
+    // Temporal: Google Vision aún fake
+    const googleFake = new FakeTaggingProviderAdapter('google_vision', false);
+
+    // Orden de prioridad: primero Imagga, luego Google fake
+    const providers = [imagga];
 
     return new AnalyzeImageUseCase(providers);
 }

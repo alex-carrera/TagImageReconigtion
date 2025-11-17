@@ -24,7 +24,7 @@ export class AnalyzeImageUseCase implements AnalyzeImageUseCaseIn {
                 const result = await provider.analyze(image, options);
                 return this.applyPostFilters(result, options);
             } catch (err) {
-                // Aquí luego loguearemos algo tipo: provider.id, mensaje, etc.
+                console.error(`[AnalyzeImageUseCase] Provider ${provider.id} failed`, err);
                 lastError = err;
             }
         }

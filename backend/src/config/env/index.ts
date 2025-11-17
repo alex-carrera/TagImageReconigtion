@@ -29,12 +29,14 @@ export const env: EnvConfig = {
 
     googleVision: {
         apiKey: required('GOOGLE_VISION_API_KEY'),
-        endpoint: process.env.GOOGLE_VISION_ENDPOINT ?? 'https://vision.googleapis.com/v1/images:annotate',
+        endpoint:
+            process.env.GOOGLE_VISION_ENDPOINT ??
+            'https://vision.googleapis.com/v1/images:annotate',
     },
 
     imagga: {
         apiKey: required('IMAGGA_API_KEY'),
         apiSecret: required('IMAGGA_API_SECRET'),
-        endpoint: process.env.IMAGGA_ENDPOINT ?? 'https://api.imagga.com/v2/tags',
+        endpoint: process.env.IMAGGA_BASE_URL ?? 'https://api.imagga.com/v2/tags',
     },
 };
