@@ -1,0 +1,1 @@
+export type ProviderId = 'google_vision' | 'imagga';
