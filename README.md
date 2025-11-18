@@ -153,21 +153,13 @@ Pasos:
    cd frontend
    npm install
    ```
-2. Configurar la URL del backend para desarrollo local. Edita:
-   `src/environments/environment.development.ts`
-   y asegúrate de que apunte a tu API local:
-   ```ts
-   export const environment = {
-     production: false,
-     apiBaseUrl: 'http://localhost:3000/api',
-   };
-   ```
-   Nota: El backend permite CORS desde `http://localhost:4200`.
-3. Iniciar el servidor de desarrollo de Angular:
+2. Iniciar el servidor de desarrollo de Angular:
    ```bash
    npm start
    ```
    La app estará en `http://localhost:4200`.
+   
+   Nota: El backend expone CORS permitiendo `http://localhost:4200` y `http://localhost:8080`, por lo que puedes llamar directamente a `http://localhost:3000/api/...` desde el frontend sin proxy.
 
 Notas (estilos):
 - La app usa Tailwind CSS con dark mode activado por clase. En `src/index.html`, el `<html>` tiene `class="dark"` y el `<body>` usa utilidades Tailwind para fondo y color de texto oscuros.
@@ -192,7 +184,39 @@ Flujo de uso:
   - Google Vision REST `images:annotate` con API Key.
   - Imagga `v2/tags` con Basic Auth (key/secret).
 - Normalización de formatos: si subes AVIF/WEBP, el backend los convierte a JPEG con Sharp para asegurar compatibilidad con Imagga.
-- CORS: habilitado para `http://localhost:4200` (métodos GET/POST/OPTIONS y cabecera `Content-Type`).
+- CORS:
+  - El backend Express incluye CORS habilitado para los orígenes `http://localhost:4200` (desarrollo local) y `http://localhost:8080` (Docker).
+  - Desde el frontend puedes llamar al backend usando URLs absolutas como `http://localhost:3000/api/analyze` sin errores de CORS.
+  - Si necesitas permitir otros orígenes, ajusta la lista `origin` en `backend/src/infrastructure/rest/express/app.ts`.
+
+---
+
+## Ejecución con Docker
+
+Se proveen Dockerfiles multietapa y un `docker-compose.yml` para levantar frontend y backend.
+
+### Requisitos
+- Docker y Docker Compose
+- Archivo `backend/.env` con las variables descritas en la sección de entorno
+
+### Levantar servicios
+```bash
+docker compose up -d --build
+```
+
+### Acceso
+- Frontend (Nginx): `http://localhost:8080`
+- Backend (Express): `http://localhost:3000`
+- Health de frontend: `http://localhost:8080/health` (devuelto por Nginx)
+- Health de backend: `http://localhost:3000/health`
+
+### Comunicación en Docker
+- Frontend en `http://localhost:8080` llama al backend en `http://localhost:3000`.
+- El backend incluye CORS para `http://localhost:8080`, por lo que no se requiere proxy en Nginx.
+
+### Builds más rápidos
+- Los Dockerfiles están optimizados con `npm ci`, multietapa y podado de dependencias (`npm prune --omit=dev` en backend).
+- Se recomienda añadir `.dockerignore` en `backend/` y `frontend/` para excluir `node_modules`, `dist`, `.git`, etc., y acelerar el envío de contexto.
 
 ### UI (Atomic Design con Tailwind)
 - Átomos: `ui-primary-button`, `ui-file-input`, `ui-loading` (spinner), `ui-tag`.
@@ -211,7 +235,7 @@ Notas UX recientes:
 
 - 415/400 al subir imagen: verifica que el campo sea `image` y que el archivo sea de tipo imagen permitido y menor a 5 MB.
 - 401/403 de proveedores: comprueba las variables de entorno y que tu proyecto de GCP tenga la Vision API habilitada; en Imagga, revisa que key/secret sean válidos.
-- CORS bloqueado: confirma que el front corre en `http://localhost:4200` y el backend en `http://localhost:3000`. Si usas otros puertos, ajusta `cors()` en `backend/src/infrastructure/rest/express/app.ts`.
+- CORS bloqueado: confirma que el front corre en `http://localhost:4200` o `http://localhost:8080` y el backend en `http://localhost:3000`. Si usas otros puertos/orígenes, ajusta `cors()` en `backend/src/infrastructure/rest/express/app.ts`.
 - 500 del backend: mira la consola del backend; si un proveedor falla, el caso de uso intenta el alternativo. Si ambos fallan, se retorna error.
 - Tema oscuro no aplicado: Tailwind usa `darkMode: 'class'`. Asegúrate de que en `frontend/src/index.html` el elemento `<html>` tenga `class="dark"` y que `src/styles.css` cargue correctamente con `@tailwind`.
 
