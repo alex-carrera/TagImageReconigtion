@@ -1,34 +1,50 @@
 <section class="page">
-  <ui-image-upload-panel (analyze)="onAnalyze($event)"></ui-image-upload-panel>
+  <h1 class="page-title">Analizador inteligente de imágenes</h1>
+  <p class="page-subtitle">
+    Sube una imagen y obtén etiquetas generadas por servicios de IA (Google Vision / Imagga).
+  </p>
 
-  @if (isLoading()) {
-    <p class="loading">Analizando imagen...</p>
-  }
+  <!-- Panel para subir y analizar -->
+  <div class="panel-card card p-4">
+    <ui-image-upload-panel (analyze)="onAnalyze($event)"></ui-image-upload-panel>
 
-  @if (previewUrl()) {
-    <div class="preview">
-      <img [src]="previewUrl()" alt="Preview" />
-    </div>
-  }
+    @if (isLoading()) {
+      <ui-loading text="Analizando imagen..." size="md" colorClass="text-cyan-400"></ui-loading>
+    }
 
-  @if (error()) {
-    <p class="error">{{ error() }}</p>
-  }
+    @if (error()) {
+      <div class="error">
+        {{ error() }}
+      </div>
+    }
+  </div>
 
-  @if (tags().length > 0) {
-    <div class="results">
-      <h3>Etiquetas detectadas</h3>
-      <ul>
-        @for (tag of tags(); track tag.label) {
-          <li>
-            <strong>{{ tag.label }}</strong>
-            ({{ tag.confidence | number: '1.2-2' }})
-          </li>
-        }
-      </ul>
+  <!-- Resultados debajo del panel de análisis -->
+  @if (previewUrl() || tags().length > 0) {
+    <div class="result-card card p-4">
+      @if (previewUrl()) {
+        <div class="preview">
+          <img [src]="previewUrl()" alt="Imagen seleccionada" />
+        </div>
+      }
 
-      @if (provider()) {
-        <p class="provider">Proveedor: {{ provider() }}</p>
+      @if (tags().length > 0) {
+        <div class="tags-section">
+          <div class="tags-header">
+            <h2>Etiquetas detectadas</h2>
+            @if (provider()) {
+              <span class="provider-pill pill">
+                Proveedor: {{ provider() }}
+              </span>
+            }
+          </div>
+
+          <div class="flex flex-wrap gap-2" aria-label="Etiquetas detectadas">
+            @for (tag of tags(); track tag.label) {
+              <ui-tag [label]="tag.label" [confidence]="tag.confidence"></ui-tag>
+            }
+          </div>
+        </div>
       }
     </div>
   }

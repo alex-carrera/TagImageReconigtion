@@ -1,48 +1,26 @@
-<mat-card class="upload-card">
-  <mat-card-title>Analizar imagen</mat-card-title>
-  <mat-card-subtitle>Selecciona una imagen desde tu equipo</mat-card-subtitle>
+<div class="upload-card card p-4">
+  <div class="mb-1 text-lg font-semibold">Analizar imagen</div>
+  <div class="text-sm text-slate-300">Selecciona una imagen desde tu equipo</div>
 
-  <mat-card-content>
-    <div class="upload-row">
-      <button
-        mat-raised-button
-        color="primary"
-        type="button"
-        (click)="fileInput.click()"
-      >
-        <mat-icon>upload</mat-icon>
-        Elegir imagen
-      </button>
+  <div class="upload-row">
+    <!-- Átomo: selector de archivo -->
+    <ui-file-input (fileSelected)="onFileSelected($event)"></ui-file-input>
 
-      @if (selectedFile) {
-        <span class="file-name">
-          {{ selectedFile.name }}
-        </span>
-      } @else {
-        <span class="file-name file-name--placeholder">
-          Ningún archivo seleccionado
-        </span>
-      }
-    </div>
-  </mat-card-content>
+    @if (selectedFile) {
+      <span class="file-name text-sm">{{ selectedFile.name }}</span>
+    } @else {
+      <span class="file-name file-name--placeholder text-sm text-slate-400">
+        Ningún archivo seleccionado
+      </span>
+    }
+  </div>
 
-  <mat-card-actions align="end">
-    <button
-      mat-flat-button
-      color="accent"
-      type="button"
-      (click)="onAnalyzeClick()"
+  <div class="mt-3 flex justify-end">
+    <!-- Átomo: botón primario -->
+    <ui-primary-button
+      label="Analizar"
       [disabled]="!selectedFile"
-    >
-      Analizar
-    </button>
-  </mat-card-actions>
-
-  <input
-    #fileInput
-    type="file"
-    accept="image/*"
-    hidden
-    (change)="onFileChange($event)"
-  />
-</mat-card>
+      (click)="onAnalyzeClick()"
+    ></ui-primary-button>
+  </div>
+</div>
