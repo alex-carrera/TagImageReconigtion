@@ -5,13 +5,13 @@ import { RouterOutlet } from '@angular/router';
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet],
-  template: '<router-outlet />',
+  templateUrl: './app.html',
   styleUrl: './app.css',
   host: {
     '[attr.data-theme]': 'theme()'
   }
 })
 export class App {
-  readonly theme = signal<'light' | 'dark'>('light');
+  readonly theme = signal<'light' | 'dark'>('dark');
   protected readonly title = signal('frontend');
 }
