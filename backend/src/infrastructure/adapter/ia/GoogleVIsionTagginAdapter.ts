@@ -6,7 +6,7 @@ import { env } from '../../../config/env/index.js';
 
 interface GoogleVisionLabelAnnotation {
     description?: string;
-    score?: number; // 0–1
+    score?: number;
 }
 
 interface GoogleVisionAnnotateResponse {
