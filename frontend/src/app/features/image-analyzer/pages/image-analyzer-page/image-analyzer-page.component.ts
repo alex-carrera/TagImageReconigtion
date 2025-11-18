@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 
 import { ImageUploadPanelComponent } from '../../../../shared/ui/organisms/image-upload-panel/image-upload-panel.component';
 import { LoadingSpinnerComponent } from '../../../../shared/ui/atoms/loading-spinner/loading-spinner.component';
@@ -15,6 +15,7 @@ import type { AnalyzeResponse } from '../../models/analyze-response.model';
     ImageUploadPanelComponent,
     LoadingSpinnerComponent,
     TagComponent,
+    NgOptimizedImage,
   ],
   templateUrl: './image-analyzer-page.component.html',
   styleUrls: ['./image-analyzer-page.component.scss'],

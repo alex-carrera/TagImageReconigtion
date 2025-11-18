@@ -3,7 +3,6 @@
   <div class="text-sm text-slate-300">Selecciona una imagen desde tu equipo</div>
 
   <div class="upload-row">
-    <!-- Átomo: selector de archivo -->
     <ui-file-input (fileSelected)="onFileSelected($event)"></ui-file-input>
 
     @if (selectedFile) {
@@ -16,7 +15,6 @@
   </div>
 
   <div class="mt-3 flex justify-end">
-    <!-- Átomo: botón primario -->
     <ui-primary-button
       label="Analizar"
       [disabled]="!selectedFile"

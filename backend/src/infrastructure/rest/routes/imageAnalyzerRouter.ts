@@ -27,7 +27,6 @@ imageAnalyzerRouter.post(
         try {
             const file = req.file;
 
-            // 1) Validar que haya archivo
             if (!file) {
                 return res.status(400).json({
                     error: 'BAD_REQUEST',
@@ -35,7 +34,6 @@ imageAnalyzerRouter.post(
                 });
             }
 
-            // 2) Validar que sea image/*
             if (!file.mimetype.startsWith('image/')) {
                 return res.status(400).json({
                     error: 'UNSUPPORTED_MEDIA_TYPE',
@@ -44,7 +42,6 @@ imageAnalyzerRouter.post(
                 });
             }
 
-            // 3) Validar que el tipo esté en nuestro whitelist
             if (!ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
                 return res.status(400).json({
                     error: 'UNSUPPORTED_IMAGE_TYPE',
@@ -55,8 +52,7 @@ imageAnalyzerRouter.post(
 
             let imageBuffer = file.buffer;
 
-            // 4) Normalizar formatos problemáticos (AVIF/WEBP → JPEG)
-            //    Imagga NO soporta AVIF, así que lo convertimos a JPEG.
+            // AVIF/WEBP → JPEG por compatibilidad con algunos proveedores (p. ej., Imagga)
             if (file.mimetype === 'image/avif' || file.mimetype === 'image/webp') {
                 try {
                     imageBuffer = await sharp(file.buffer)
@@ -88,9 +84,8 @@ imageAnalyzerRouter.post(
                 height: result.height,
                 provider: result.providerId ?? null,
             });
-        } catch (err) {
-            // Aquí de momento solo delegamos al error handler global
-            next(err);
+            } catch (err) {
+                next(err);
+            }
         }
-    }
 );

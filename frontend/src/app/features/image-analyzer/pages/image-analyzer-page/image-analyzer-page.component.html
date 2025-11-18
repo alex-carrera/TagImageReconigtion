@@ -4,7 +4,6 @@
     Sube una imagen y obtén etiquetas generadas por servicios de IA (Google Vision / Imagga).
   </p>
 
-  <!-- Panel para subir y analizar -->
   <div class="panel-card card p-4">
     <ui-image-upload-panel (analyze)="onAnalyze($event)"></ui-image-upload-panel>
 
@@ -19,7 +18,6 @@
     }
   </div>
 
-  <!-- Resultados debajo del panel de análisis -->
   @if (previewUrl() || tags().length > 0) {
     <div class="result-card card p-4">
       @if (previewUrl()) {

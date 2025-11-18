@@ -23,6 +23,6 @@ export class ImageUploadPanelComponent {
     if (!this.selectedFile) {
       return;
     }
-    this.analyze.emit(this.selectedFile); // 👈 emitimos File, no Event
+    this.analyze.emit(this.selectedFile);
   }
 }

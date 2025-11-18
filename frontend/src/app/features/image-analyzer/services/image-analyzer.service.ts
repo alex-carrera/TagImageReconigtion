@@ -25,7 +25,6 @@ export class ImageAnalyzerHttpService {
     const formData = new FormData();
     formData.append('image', file);
 
-    // Más adelante podríamos añadir options al body o querystring
     return this.http.post<AnalyzeResponse>(`${this.baseUrl}/analyze`, formData);
   }
 }
