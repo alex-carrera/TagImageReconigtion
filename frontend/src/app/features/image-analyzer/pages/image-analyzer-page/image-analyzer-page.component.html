@@ -5,7 +5,7 @@
   </p>
 
   <div class="panel-card card p-4 md:p-6">
-    <ui-image-upload-panel (analyze)="onAnalyze($event)"></ui-image-upload-panel>
+    <ui-image-upload-panel (analyze)="onAnalyze($event)" (fileChanged)="onFileChanged()"></ui-image-upload-panel>
 
     @if (isLoading()) {
       <ui-loading text="Analizando imagen..." size="md" colorClass="text-cyan-400"></ui-loading>
@@ -18,7 +18,7 @@
     }
   </div>
 
-  @if (previewUrl() || tags().length > 0) {
+  @if (tags().length > 0) {
     <div class="result-card card p-4 md:p-6">
       @let url = previewUrl();
       @if (url) {

@@ -36,7 +36,7 @@ export class ImageAnalyzerPageComponent {
     if (this.previewUrl()) {
       URL.revokeObjectURL(this.previewUrl()!);
     }
-    this.previewUrl.set(URL.createObjectURL(file));
+    this.previewUrl.set(null);
 
     this.isLoading.set(true);
 
@@ -48,6 +48,9 @@ export class ImageAnalyzerPageComponent {
 
         if (!res.tags.length) {
           this.error.set('La IA no generó etiquetas útiles para esta imagen.');
+        } else {
+          // Solo cuando hay tags exitosos mostramos la imagen asociada.
+          this.previewUrl.set(URL.createObjectURL(file));
         }
       },
       error: () => {
@@ -55,6 +58,17 @@ export class ImageAnalyzerPageComponent {
         this.error.set('Error al analizar la imagen.');
       },
     });
+  }
+
+  onFileChanged(): void {
+    if (this.previewUrl()) {
+      URL.revokeObjectURL(this.previewUrl()!);
+    }
+    this.previewUrl.set(null);
+    this.tags.set([]);
+    this.provider.set(null);
+    this.error.set(null);
+    this.isLoading.set(false);
   }
 
 }
