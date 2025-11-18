@@ -4,7 +4,7 @@
     Sube una imagen y obtén etiquetas generadas por servicios de IA (Google Vision / Imagga).
   </p>
 
-  <div class="panel-card card p-4">
+  <div class="panel-card card p-4 md:p-6">
     <ui-image-upload-panel (analyze)="onAnalyze($event)"></ui-image-upload-panel>
 
     @if (isLoading()) {
@@ -19,10 +19,15 @@
   </div>
 
   @if (previewUrl() || tags().length > 0) {
-    <div class="result-card card p-4">
-      @if (previewUrl()) {
-        <div class="preview">
-          <img [src]="previewUrl()" alt="Imagen seleccionada" />
+    <div class="result-card card p-4 md:p-6">
+      @let url = previewUrl();
+      @if (url) {
+        <div class="preview relative h-64 sm:h-72 md:h-80">
+          <img
+            [src]="url"
+            alt="Imagen seleccionada"
+            class="w-full h-full object-contain rounded-lg"
+          />
         </div>
       }
 
