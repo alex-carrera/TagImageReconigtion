@@ -126,6 +126,20 @@ Endpoints útiles:
   - Campo del archivo: `image`
   - Límite de tamaño: 5 MB
   - Tipos permitidos: JPEG, PNG, WEBP, AVIF (AVIF/WEBP se convierten a JPEG para compatibilidad con Imagga)
+  - Respuestas de error comunes
+    - `400 NO_FILE_UPLOADED`: no se adjuntó archivo
+    - `415 UNSUPPORTED_MEDIA_TYPE`: el mimetype no es una imagen (p. ej. PDF)
+    - `415 UNSUPPORTED_IMAGE_TYPE`: imagen no permitida (solo JPEG, PNG, WEBP, AVIF)
+    - `413 FILE_TOO_LARGE`: excede 5 MB
+    - `400 IMAGE_CONVERSION_FAILED`: fallo al convertir AVIF/WEBP a JPEG
+  - Respuesta exitosa (200)
+    ```json
+    {
+      "tags": [{ "label": "cat", "confidence": 0.92 }],
+      "provider": "google_vision"
+    }
+    ```
+    Nota: `provider` puede ser `"google_vision"`, `"imagga"` o `null`.
 
 ### 2) Frontend (SPA Angular)
 
@@ -163,7 +177,11 @@ Flujo de uso:
 1. Abre `http://localhost:4200`.
 2. Selecciona una imagen (hasta 5 MB; JPEG/PNG/WEBP/AVIF).
 3. Presiona “Analizar”. El front enviará `multipart/form-data` a `POST /api/analyze`.
-4. Verás etiquetas con su confianza y el proveedor que respondió.
+4. Comportamiento de la UI:
+   - Se muestra un indicador de carga “Analizando imagen…”.
+   - La imagen de previsualización NO se muestra hasta que el backend devuelva etiquetas válidas.
+   - Al recibir etiquetas, se muestra la imagen y los tags; si no hay etiquetas útiles, se muestra un mensaje de aviso.
+   - Si seleccionas una nueva imagen, se limpian inmediatamente la previsualización, tags, proveedor y errores anteriores (se revoca la URL anterior para evitar fugas de memoria).
 
 ---
 
@@ -181,6 +199,12 @@ Flujo de uso:
 - Organismo: `ui-image-upload-panel`.
 - Página: `ImageAnalyzerPage` compone el organismo y muestra resultados debajo del panel de análisis.
 
+Notas UX recientes:
+- Previsualización de imagen: Angular `NgOptimizedImage` no soporta URLs `blob:`. Para el preview se reemplazó `ngSrc` por `src` en el `<img>` de la página para evitar el error `NG02952` y permitir blobs.
+- La previsualización se retrasa hasta que existan etiquetas (mejor percepción de “análisis en progreso”).
+- Al seleccionar un nuevo archivo, se limpia el resultado anterior y se revoca la `ObjectURL` para liberar memoria.
+- Accesibilidad y responsive: en móviles los botones son de ancho completo (`w-full`) con texto centrado y salto de línea para evitar desbordes; a partir de `md` vuelven a ancho natural.
+
 ---
 
 ## Resolución de problemas (FAQ)
@@ -190,6 +214,41 @@ Flujo de uso:
 - CORS bloqueado: confirma que el front corre en `http://localhost:4200` y el backend en `http://localhost:3000`. Si usas otros puertos, ajusta `cors()` en `backend/src/infrastructure/rest/express/app.ts`.
 - 500 del backend: mira la consola del backend; si un proveedor falla, el caso de uso intenta el alternativo. Si ambos fallan, se retorna error.
 - Tema oscuro no aplicado: Tailwind usa `darkMode: 'class'`. Asegúrate de que en `frontend/src/index.html` el elemento `<html>` tenga `class="dark"` y que `src/styles.css` cargue correctamente con `@tailwind`.
+
+### Errores de TypeScript/Vitest frecuentes
+
+- TS2307: "Cannot find module 'vite-tsconfig-paths'" al ejecutar pruebas en `backend/`:
+  - Instala el plugin en el backend: `cd backend && npm i -D vite-tsconfig-paths`.
+  - El archivo `backend/vitest.config.ts` usa `plugins: [tsconfigPaths()]`.
+
+- TS7016: "Could not find a declaration file for module 'supertest'":
+  - Instala tipos: `cd backend && npm i -D @types/supertest`.
+  - Asegúrate que `backend/tsconfig.json` incluya `"types": ["vitest", "node"]`.
+
+### Pruebas (backend)
+
+El backend usa **Vitest** + **Supertest**. Pruebas incluidas:
+- `src/aplication/service/AnalyzeImageUseCase.spec.ts`: orquestación de proveedores y filtros.
+- `src/infrastructure/rest/routes/imageAnalyzerRouter.spec.ts`: validaciones de la ruta `/api/analyze` (mimetype y tamaño).
+
+Comandos:
+```bash
+cd backend
+npm test           # Ejecuta las pruebas (modo run)
+npm run test:watch # Modo watch con Vitest UI opcional
+npm run test:ui    # Abre la UI de Vitest
+```
+
+Cobertura: configurada con `@vitest/coverage-v8` (report `text` y `html`). El reporte HTML se genera en `backend/coverage/`.
+
+Nota CI: si ejecutas pruebas en CI, instala también `devDependencies` (no uses `--only=production`) para disponer de `vitest`, `supertest`, `@types/supertest` y `vite-tsconfig-paths`.
+
+### Convenciones de commits
+
+Se sigue un formato estilo Conventional Commits en minúsculas. Ejemplos recientes:
+- `fix(frontend): show preview only after tags and clear previous result on new selection`
+- `test(backend): add route specs for /api/analyze (media type and size limits)`
+- `chore(backend): add @types/supertest and enable Vitest types in tsconfig`
 
 ---
 
