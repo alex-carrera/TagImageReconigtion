@@ -1,10 +1,11 @@
 export interface AnalyzeTag {
-  name: string;
+  label: string;
   confidence: number;
 }
 
 export interface AnalyzeResponse {
   tags: AnalyzeTag[];
-  width?: number;
-  height?: number;
+  width?: number | null;
+  height?: number | null;
+  provider?: string | null;
 }

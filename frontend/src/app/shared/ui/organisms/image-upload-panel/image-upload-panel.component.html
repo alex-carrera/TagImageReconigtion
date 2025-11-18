@@ -1,20 +1,48 @@
-<mat-card class="upload-panel surface">
-  <mat-card-header>
-    <mat-card-title>Analizador de Imágenes</mat-card-title>
-    <mat-card-subtitle class="text-muted">
-      Sube una imagen y te devolveremos etiquetas descriptivas usando IA.
-    </mat-card-subtitle>
-  </mat-card-header>
+<mat-card class="upload-card">
+  <mat-card-title>Analizar imagen</mat-card-title>
+  <mat-card-subtitle>Selecciona una imagen desde tu equipo</mat-card-subtitle>
 
   <mat-card-content>
-    <ui-file-input (fileSelected)="onFileSelected($event)"></ui-file-input>
+    <div class="upload-row">
+      <button
+        mat-raised-button
+        color="primary"
+        type="button"
+        (click)="fileInput.click()"
+      >
+        <mat-icon>upload</mat-icon>
+        Elegir imagen
+      </button>
+
+      @if (selectedFile) {
+        <span class="file-name">
+          {{ selectedFile.name }}
+        </span>
+      } @else {
+        <span class="file-name file-name--placeholder">
+          Ningún archivo seleccionado
+        </span>
+      }
+    </div>
   </mat-card-content>
 
-  <mat-card-actions>
-    <ui-primary-button
-      label="Analizar imagen"
-      [disabled]="isAnalyzeDisabled"
+  <mat-card-actions align="end">
+    <button
+      mat-flat-button
+      color="accent"
+      type="button"
       (click)="onAnalyzeClick()"
-    ></ui-primary-button>
+      [disabled]="!selectedFile"
+    >
+      Analizar
+    </button>
   </mat-card-actions>
+
+  <input
+    #fileInput
+    type="file"
+    accept="image/*"
+    hidden
+    (change)="onFileChange($event)"
+  />
 </mat-card>
