@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ImageUploadPanelComponent } from '../../../../shared/ui/organisms/image-upload-panel/image-upload-panel.component';
+import { ImageAnalyzerHttpService } from '../../services/image-analyzer.service';
+import type { AnalyzeResponse } from '../../models/analyze-response.model';
 
 @Component({
   selector: 'app-image-analyzer-page',
@@ -10,12 +12,40 @@ import { ImageUploadPanelComponent } from '../../../../shared/ui/organisms/image
   styleUrls: ['./image-analyzer-page.component.scss'],
 })
 export class ImageAnalyzerPageComponent {
-  // Aquí guardaremos el último archivo seleccionado
-  selectedFile: File | null = null;
+  isLoading = signal(false);
+  previewUrl = signal<string | null>(null);
+  tags = signal<AnalyzeResponse['tags']>([]);
+  error = signal<string | null>(null);
+  provider = signal<string | null>(null);
+
+  constructor(private readonly api: ImageAnalyzerHttpService) {}
 
   onAnalyze(file: File): void {
-    this.selectedFile = file;
-    // Por ahora solo podemos hacer un console.log, luego llamaremos al servicio
-    console.log('Archivo listo para analizar:', file);
+    this.error.set(null);
+    this.tags.set([]);
+    this.provider.set(null);
+
+    if (this.previewUrl()) {
+      URL.revokeObjectURL(this.previewUrl()!);
+    }
+    this.previewUrl.set(URL.createObjectURL(file));
+
+    this.isLoading.set(true);
+
+    this.api.analyzeImage(file).subscribe({
+      next: (res) => {
+        this.isLoading.set(false);
+        this.tags.set(res.tags);
+        this.provider.set(res.provider ?? null);
+
+        if (!res.tags.length) {
+          this.error.set('La IA no generó etiquetas útiles para esta imagen.');
+        }
+      },
+      error: () => {
+        this.isLoading.set(false);
+        this.error.set('Error al analizar la imagen.');
+      },
+    });
   }
 }

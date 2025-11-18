@@ -1,15 +1,19 @@
-.upload-panel {
-  max-width: 480px;
-  margin: 24px auto;
-  padding: 8px 16px;
+.upload-card {
+  max-width: 640px;
+  margin: 0 auto 24px;
 }
 
-mat-card-content {
-  margin-top: 12px;
-  margin-bottom: 12px;
-}
-
-mat-card-actions {
+.upload-row {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.file-name {
+  font-size: 0.875rem;
+}
+
+.file-name--placeholder {
+  color: var(--color-muted, #6b7280);
 }

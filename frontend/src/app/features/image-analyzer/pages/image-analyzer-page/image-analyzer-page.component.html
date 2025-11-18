@@ -1,3 +1,35 @@
 <section class="page">
   <ui-image-upload-panel (analyze)="onAnalyze($event)"></ui-image-upload-panel>
+
+  @if (isLoading()) {
+    <p class="loading">Analizando imagen...</p>
+  }
+
+  @if (previewUrl()) {
+    <div class="preview">
+      <img [src]="previewUrl()" alt="Preview" />
+    </div>
+  }
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (tags().length > 0) {
+    <div class="results">
+      <h3>Etiquetas detectadas</h3>
+      <ul>
+        @for (tag of tags(); track tag.label) {
+          <li>
+            <strong>{{ tag.label }}</strong>
+            ({{ tag.confidence | number: '1.2-2' }})
+          </li>
+        }
+      </ul>
+
+      @if (provider()) {
+        <p class="provider">Proveedor: {{ provider() }}</p>
+      }
+    </div>
+  }
 </section>
