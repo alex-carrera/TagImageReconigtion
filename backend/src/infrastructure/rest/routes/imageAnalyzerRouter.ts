@@ -34,13 +34,6 @@ imageAnalyzerRouter.post(
                 });
             }
 
-            if (file.size > 5 * 1024 * 1024) {
-                return res.status(413).json({
-                    error: 'FILE_TOO_LARGE',
-                    message: 'El archivo excede el límite de 5MB.',
-                });
-            }
-
             if (!file.mimetype.startsWith('image/')) {
                 return res.status(415).json({
                     error: 'UNSUPPORTED_MEDIA_TYPE',
@@ -51,7 +44,8 @@ imageAnalyzerRouter.post(
             if (!ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
                 return res.status(415).json({
                     error: 'UNSUPPORTED_IMAGE_TYPE',
-                    message: 'Formato de imagen no soportado. Solo JPEG, PNG, WEBP o AVIF.',
+                    message:
+                        'Formato de imagen no soportado. Solo JPEG, PNG, WEBP o AVIF.',
                 });
             }
 
@@ -59,11 +53,14 @@ imageAnalyzerRouter.post(
 
             if (file.mimetype === 'image/avif' || file.mimetype === 'image/webp') {
                 try {
-                    imageBuffer = await sharp(file.buffer).jpeg({ quality: 90 }).toBuffer();
+                    imageBuffer = await sharp(file.buffer)
+                        .jpeg({ quality: 90 })
+                        .toBuffer();
                 } catch {
                     return res.status(400).json({
                         error: 'IMAGE_CONVERSION_FAILED',
-                        message: 'No se pudo procesar la imagen. Intenta con un JPEG o PNG.',
+                        message:
+                            'No se pudo procesar la imagen. Intenta con un JPEG o PNG.',
                     });
                 }
             }
@@ -80,14 +77,7 @@ imageAnalyzerRouter.post(
                 tags: result.tags,
                 provider: result.providerId ?? null,
             });
-        } catch (err: any) {
-            if (err?.code === 'LIMIT_FILE_SIZE') {
-                return res.status(413).json({
-                    error: 'FILE_TOO_LARGE',
-                    message: 'El archivo excede el límite de 5MB.',
-                });
-            }
-
+        } catch (err) {
             next(err);
         }
     }
