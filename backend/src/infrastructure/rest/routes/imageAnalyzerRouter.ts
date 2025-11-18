@@ -1,14 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import sharp from 'sharp';
-import {createAnalyzeImageUseCase} from "../../config/container.js";
-
-const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: {
-        fileSize: 5 * 1024 * 1024, // 5 MB
-    },
-});
+import { createAnalyzeImageUseCase } from '../../config/container.js';
 
 export const imageAnalyzerRouter = Router();
 
@@ -20,6 +13,13 @@ const ALLOWED_IMAGE_TYPES = [
     'image/avif',
 ];
 
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 5 * 1024 * 1024, // 5 MB
+    },
+});
+
 imageAnalyzerRouter.post(
     '/analyze',
     upload.single('image'),
@@ -29,40 +29,41 @@ imageAnalyzerRouter.post(
 
             if (!file) {
                 return res.status(400).json({
-                    error: 'BAD_REQUEST',
-                    message: 'No image file provided',
+                    error: 'NO_FILE_UPLOADED',
+                    message: 'Debes subir una imagen.',
+                });
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                return res.status(413).json({
+                    error: 'FILE_TOO_LARGE',
+                    message: 'El archivo excede el límite de 5MB.',
                 });
             }
 
             if (!file.mimetype.startsWith('image/')) {
-                return res.status(400).json({
+                return res.status(415).json({
                     error: 'UNSUPPORTED_MEDIA_TYPE',
-                    message:
-                        'Only image files are allowed (jpeg, png, webp, avif).',
+                    message: 'Solo se permiten imágenes. Ejemplo: JPEG, PNG, WEBP, AVIF.',
                 });
             }
 
             if (!ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
-                return res.status(400).json({
+                return res.status(415).json({
                     error: 'UNSUPPORTED_IMAGE_TYPE',
-                    message:
-                        'Unsupported image type. Allowed types: JPEG, PNG, WEBP, AVIF.',
+                    message: 'Formato de imagen no soportado. Solo JPEG, PNG, WEBP o AVIF.',
                 });
             }
 
             let imageBuffer = file.buffer;
 
-            // AVIF/WEBP → JPEG por compatibilidad con algunos proveedores (p. ej., Imagga)
             if (file.mimetype === 'image/avif' || file.mimetype === 'image/webp') {
                 try {
-                    imageBuffer = await sharp(file.buffer)
-                        .jpeg({ quality: 90 })
-                        .toBuffer();
-                } catch (err) {
+                    imageBuffer = await sharp(file.buffer).jpeg({ quality: 90 }).toBuffer();
+                } catch {
                     return res.status(400).json({
                         error: 'IMAGE_CONVERSION_FAILED',
-                        message:
-                            'Could not process the uploaded image. Try another image or format (JPEG/PNG).',
+                        message: 'No se pudo procesar la imagen. Intenta con un JPEG o PNG.',
                     });
                 }
             }
@@ -76,16 +77,18 @@ imageAnalyzerRouter.post(
             });
 
             return res.json({
-                tags: result.tags.map((t) => ({
-                    label: t.label,
-                    confidence: t.confidence,
-                })),
-                width: result.width,
-                height: result.height,
+                tags: result.tags,
                 provider: result.providerId ?? null,
             });
-            } catch (err) {
-                next(err);
+        } catch (err: any) {
+            if (err?.code === 'LIMIT_FILE_SIZE') {
+                return res.status(413).json({
+                    error: 'FILE_TOO_LARGE',
+                    message: 'El archivo excede el límite de 5MB.',
+                });
             }
+
+            next(err);
         }
+    }
 );
